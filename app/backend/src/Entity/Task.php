@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\TaskRepository;
+use App\State\Processor\CreateTaskProcessor;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     new GetCollection(),
     new Get(security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'),
     new Post(
+      processor: CreateTaskProcessor::class,
       securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
     ),
     new Patch(

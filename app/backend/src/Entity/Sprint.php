@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SprintRepository;
+use App\State\Processor\CreateSprintProcessor;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -31,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     new GetCollection(),
     new Get(security: 'object.getProject() and object.getProject().getOwner() == user'),
     new Post(
+      processor: CreateSprintProcessor::class,
       securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() == user'
     ),
     new Patch(
