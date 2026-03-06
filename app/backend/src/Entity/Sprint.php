@@ -27,7 +27,18 @@ use Symfony\Component\Validator\Constraints as Assert;
   new ORM\UniqueConstraint(name: 'UNIQ_PROJECT_SPRINT_POSITION', columns: ['project_id', 'position'])
 ])]
 #[ApiResource(
-  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  operations: [
+    new GetCollection(),
+    new Get(security: 'object.getProject() and object.getProject().getOwner() == user'),
+    new Post(
+      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() == user'
+    ),
+    new Patch(
+      security: 'object.getProject() and object.getProject().getOwner() == user',
+      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() == user'
+    ),
+    new Delete(security: 'object.getProject() and object.getProject().getOwner() == user'),
+  ],
   normalizationContext: ['groups' => ['sprint:read']],
   denormalizationContext: ['groups' => ['sprint:write']]
 )]

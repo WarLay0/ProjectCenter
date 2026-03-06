@@ -11,7 +11,9 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Dto\CreateProjectInput;
 use App\Repository\ProjectRepository;
+use App\State\Processor\CreateProjectProcessor;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -24,7 +26,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[ApiResource(
-  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  operations: [
+    new GetCollection(),
+    new Get(security: 'object.getOwner() == user'),
+    new Post(
+      input: CreateProjectInput::class,
+      processor: CreateProjectProcessor::class
+    ),
+    new Patch(security: 'object.getOwner() == user'),
+    new Delete(security: 'object.getOwner() == user'),
+  ],
   normalizationContext: ['groups' => ['project:read']],
   denormalizationContext: ['groups' => ['project:write']]
 )]
@@ -57,7 +68,7 @@ class Project
   #[ORM\JoinColumn(nullable: false)]
   #[Assert\NotNull(message: 'Le propriétaire du projet est requis.')]
   #[ApiProperty(readableLink: false, writableLink: false)]
-  #[Groups(['project:read', 'project:write'])]
+  #[Groups(['project:read'])]
   private ?User $owner = null;
 
   #[ORM\OneToMany(mappedBy: 'project', targetEntity: Sprint::class)]

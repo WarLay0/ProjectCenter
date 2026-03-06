@@ -7,6 +7,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
+use App\State\Provider\MeProvider;
 use App\Dto\RegisterUserInput;
 use App\Repository\UserRepository;
 use App\State\Processor\RegisterUserProcessor;
@@ -29,7 +30,12 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[UniqueEntity(fields: ['email'], message: 'Cet email est deja utilise.')]
 #[ApiResource(
   operations: [
-    new Get(),
+    new Get(security: 'object == user'),
+    new Get(
+      uriTemplate: '/me',
+      provider: MeProvider::class,
+      security: "is_granted('IS_AUTHENTICATED_FULLY')"
+    ),
     new Post(
       uriTemplate: '/register',
       input: RegisterUserInput::class,

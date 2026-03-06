@@ -25,7 +25,20 @@ use Symfony\Component\Validator\Constraints as Assert;
   new ORM\UniqueConstraint(name: 'UNIQ_SPRINT_TASK_POSITION', columns: ['sprint_id', 'position'])
 ])]
 #[ApiResource(
-  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  operations: [
+    new GetCollection(),
+    new Get(security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'),
+    new Post(
+      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+    ),
+    new Patch(
+      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user',
+      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+    ),
+    new Delete(
+      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+    ),
+  ],
   normalizationContext: ['groups' => ['task:read']],
   denormalizationContext: ['groups' => ['task:write']]
 )]
