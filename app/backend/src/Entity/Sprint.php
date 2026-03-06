@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\SprintRepository;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
@@ -11,6 +18,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[HasLifecycleCallbacks]
@@ -18,6 +26,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'sprint', uniqueConstraints: [
   new ORM\UniqueConstraint(name: 'UNIQ_PROJECT_SPRINT_POSITION', columns: ['project_id', 'position'])
 ])]
+#[ApiResource(
+  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  normalizationContext: ['groups' => ['sprint:read']],
+  denormalizationContext: ['groups' => ['sprint:write']]
+)]
 class Sprint
 {
   // ==================== Traits ====================
@@ -32,6 +45,7 @@ class Sprint
     max: 255,
     maxMessage: 'Le nom du sprint ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['sprint:read', 'sprint:write'])]
   private ?string $name = null;
 
   #[ORM\Column(type: 'text', nullable: true)]
@@ -39,18 +53,25 @@ class Sprint
     max: 5000,
     maxMessage: 'La description du sprint ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['sprint:read', 'sprint:write'])]
   private ?string $description = null;
 
   #[ORM\Column(type: 'integer', nullable: false)]
   #[Assert\NotNull(message: 'La position du sprint est requise.')]
   #[Assert\Positive(message: 'La position du sprint doit être supérieure à 0.')]
+  #[Groups(['sprint:read', 'sprint:write'])]
   private ?int $position = null;
 
   #[ORM\ManyToOne(inversedBy: 'sprints')]
   #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+  #[Assert\NotNull(message: 'Le projet du sprint est requis.')]
+  #[ApiProperty(readableLink: false, writableLink: false)]
+  #[Groups(['sprint:read', 'sprint:write'])]
   private ?Project $project = null;
 
   #[ORM\OneToMany(mappedBy: 'sprint', targetEntity: Task::class)]
+  #[ApiProperty(readableLink: false, writableLink: false)]
+  #[Groups(['sprint:read'])]
   private Collection $tasks;
 
   // ==================== Methods ====================

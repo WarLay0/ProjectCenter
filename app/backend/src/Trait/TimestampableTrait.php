@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Trait;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 trait TimestampableTrait
 {
   #[ORM\Column(type: 'datetime_immutable')]
+  #[Groups(['user:read', 'project:read', 'sprint:read', 'task:read'])]
   private ?\DateTimeImmutable $createdAt = null;
 
   #[ORM\Column(type: 'datetime_immutable')]
+  #[Groups(['user:read', 'project:read', 'sprint:read', 'task:read'])]
   private ?\DateTimeImmutable $updatedAt = null;
 
   #[ORM\PrePersist]

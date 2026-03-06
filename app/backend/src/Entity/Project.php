@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\ProjectRepository;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
@@ -11,10 +18,16 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
+#[ApiResource(
+  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  normalizationContext: ['groups' => ['project:read']],
+  denormalizationContext: ['groups' => ['project:write']]
+)]
 class Project
 {
   // ==================== Traits ====================
@@ -29,6 +42,7 @@ class Project
     max: 255,
     maxMessage: 'Le nom du projet ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['project:read', 'project:write'])]
   private ?string $name = null;
 
   #[ORM\Column(type: 'text', nullable: true)]
@@ -36,13 +50,19 @@ class Project
     max: 5000,
     maxMessage: 'La description du projet ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['project:read', 'project:write'])]
   private ?string $description = null;
 
   #[ORM\ManyToOne(inversedBy: 'projects')]
   #[ORM\JoinColumn(nullable: false)]
+  #[Assert\NotNull(message: 'Le propriétaire du projet est requis.')]
+  #[ApiProperty(readableLink: false, writableLink: false)]
+  #[Groups(['project:read', 'project:write'])]
   private ?User $owner = null;
 
   #[ORM\OneToMany(mappedBy: 'project', targetEntity: Sprint::class)]
+  #[ApiProperty(readableLink: false, writableLink: false)]
+  #[Groups(['project:read'])]
   private Collection $sprints;
 
   // ==================== Methods ====================

@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use App\Dto\RegisterUserInput;
 use App\Repository\UserRepository;
+use App\State\Processor\RegisterUserProcessor;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,11 +18,26 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est deja utilise.')]
+#[ApiResource(
+  operations: [
+    new Get(),
+    new Post(
+      uriTemplate: '/register',
+      input: RegisterUserInput::class,
+      processor: RegisterUserProcessor::class
+    ),
+  ],
+  normalizationContext: ['groups' => ['user:read']]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
   // ==================== Traits ====================
@@ -26,6 +46,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
   // ==================== Properties ====================
   #[ORM\Column(length: 180)]
+  #[Assert\NotBlank(message: 'L\'email est requis.')]
+  #[Assert\Email(message: 'L\'email doit etre valide.')]
+  #[Groups(['user:read'])]
   private ?string $email = null;
 
   #[ORM\Column]

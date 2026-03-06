@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\TaskRepository;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[HasLifecycleCallbacks]
@@ -16,6 +24,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'task', uniqueConstraints: [
   new ORM\UniqueConstraint(name: 'UNIQ_SPRINT_TASK_POSITION', columns: ['sprint_id', 'position'])
 ])]
+#[ApiResource(
+  operations: [new GetCollection(), new Get(), new Post(), new Patch(), new Delete()],
+  normalizationContext: ['groups' => ['task:read']],
+  denormalizationContext: ['groups' => ['task:write']]
+)]
 class Task
 {
   // ==================== Traits ====================
@@ -30,6 +43,7 @@ class Task
     max: 255,
     maxMessage: 'Le nom de la task ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['task:read', 'task:write'])]
   private ?string $name = null;
 
   #[ORM\Column(type: 'text', nullable: true)]
@@ -37,6 +51,7 @@ class Task
     max: 5000,
     maxMessage: 'La description de la task ne peut pas dépasser {{ limit }} caractères.'
   )]
+  #[Groups(['task:read', 'task:write'])]
   private ?string $description = null;
 
   #[ORM\Column(type: 'string', length: 20, nullable: false)]
@@ -45,15 +60,20 @@ class Task
     choices: ['todo', 'in_progress', 'done'],
     message: 'Le statut de la task doit être valide.'
   )]
+  #[Groups(['task:read', 'task:write'])]
   private string $status = 'todo';
 
   #[ORM\Column(type: 'integer', nullable: false)]
   #[Assert\NotNull(message: 'La position de la task est requise.')]
   #[Assert\Positive(message: 'La position de la task doit être supérieure à 0.')]
+  #[Groups(['task:read', 'task:write'])]
   private ?int $position = null;
 
   #[ORM\ManyToOne(inversedBy: 'tasks')]
   #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+  #[Assert\NotNull(message: 'Le sprint de la task est requis.')]
+  #[ApiProperty(readableLink: false, writableLink: false)]
+  #[Groups(['task:read', 'task:write'])]
   private ?Sprint $sprint = null;
 
   // ==================== Getters/Setters ====================
