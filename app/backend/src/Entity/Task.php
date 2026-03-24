@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -17,33 +20,34 @@ use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
-#[ORM\Table(name: 'task', uniqueConstraints: [
-  new ORM\UniqueConstraint(name: 'UNIQ_SPRINT_TASK_POSITION', columns: ['sprint_id', 'position'])
-])]
+#[ORM\Table(name: 'task')]
+#[ORM\UniqueConstraint(name: 'UNIQ_SPRINT_TASK_POSITION', fields: ['sprint', 'position'])]
 #[ApiResource(
   operations: [
     new GetCollection(),
-    new Get(security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'),
+    new Get(security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'),
     new Post(
       processor: CreateTaskProcessor::class,
-      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'
     ),
     new Patch(
-      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user',
-      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()',
+      securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'
     ),
     new Delete(
-      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() == user'
+      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'
     ),
   ],
   normalizationContext: ['groups' => ['task:read']],
   denormalizationContext: ['groups' => ['task:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['sprint' => 'exact', 'status' => 'exact', 'name' => 'partial'])]
+#[ApiFilter(OrderFilter::class, properties: ['position', 'createdAt'])]
 class Task
 {
   // ==================== Traits ====================

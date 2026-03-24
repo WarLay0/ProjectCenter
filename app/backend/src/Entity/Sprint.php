@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -19,31 +22,32 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SprintRepository::class)]
-#[ORM\Table(name: 'sprint', uniqueConstraints: [
-  new ORM\UniqueConstraint(name: 'UNIQ_PROJECT_SPRINT_POSITION', columns: ['project_id', 'position'])
-])]
+#[ORM\Table(name: 'sprint')]
+#[ORM\UniqueConstraint(name: 'UNIQ_PROJECT_SPRINT_POSITION', fields: ['project', 'position'])]
 #[ApiResource(
   operations: [
     new GetCollection(),
-    new Get(security: 'object.getProject() and object.getProject().getOwner() == user'),
+    new Get(security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'),
     new Post(
       processor: CreateSprintProcessor::class,
-      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() == user'
+      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
     ),
     new Patch(
-      security: 'object.getProject() and object.getProject().getOwner() == user',
-      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() == user'
+      security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()',
+      securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
     ),
-    new Delete(security: 'object.getProject() and object.getProject().getOwner() == user'),
+    new Delete(security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'),
   ],
   normalizationContext: ['groups' => ['sprint:read']],
   denormalizationContext: ['groups' => ['sprint:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['project' => 'exact', 'name' => 'partial'])]
+#[ApiFilter(OrderFilter::class, properties: ['position', 'createdAt'])]
 class Sprint
 {
   // ==================== Traits ====================
