@@ -1,2 +1,10 @@
 <h1>Connexion</h1>
-<p>Page login ProjectCenter</p>
+
+<form (ngSubmit)="onSubmit()">
+  <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required>
+  <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe" required>
+
+  <button type="submit">Se connecter</button>
+</form>
+
+<p *ngIf="error" style="color:red">{{ error }}</p>
