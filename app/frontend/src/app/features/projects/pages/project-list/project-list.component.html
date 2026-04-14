@@ -1,2 +1,32 @@
-<h1>Mes projets</h1>
-<p>Liste des projets</p>
+<section class="projects-page">
+  <div class="page-header">
+    <div>
+      <h1>Mes projets</h1>
+      <p>Visualisez l’ensemble de vos projets et leur avancement.</p>
+    </div>
+
+    <button>Nouveau projet</button>
+  </div>
+
+  <div class="projects-grid">
+    <a
+      class="project-card"
+      *ngFor="let project of projects"
+      [routerLink]="['/projects', project.id]"
+    >
+      <h2>{{ project.name }}</h2>
+      <p>{{ project.description }}</p>
+
+      <div class="progress-block">
+        <div class="progress-label">
+          <span>Avancement</span>
+          <strong>{{ project.progress }}%</strong>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-bar__fill" [style.width.%]="project.progress"></div>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>

@@ -1,0 +1,31 @@
+.header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__logo {
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.header__nav {
+  display: flex;
+  gap: 20px;
+
+  a {
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+  }
+}

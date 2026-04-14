@@ -1,10 +1,36 @@
-<h1>Connexion</h1>
+<section class="login-page">
+  <div class="login-card">
+    <h1>Connexion</h1>
+    <p>Accédez à votre espace ProjectCenter.</p>
 
-<form (ngSubmit)="onSubmit()">
-  <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required>
-  <input type="password" [(ngModel)]="password" name="password" placeholder="Mot de passe" required>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="exemple@email.com"
+          required
+        />
+      </div>
 
-  <button type="submit">Se connecter</button>
-</form>
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Votre mot de passe"
+          required
+        />
+      </div>
 
-<p *ngIf="error" style="color:red">{{ error }}</p>
+      <button type="submit">Se connecter</button>
+    </form>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </div>
+</section>
