@@ -1,34 +1,272 @@
 <section class="project-detail-page">
-  <div class="project-hero">
-    <div>
+
+  <!-- Header projet -->
+  <div class="project-top">
+    <a routerLink="/projects" class="project-top__back" aria-label="Retour">
+      ←
+    </a>
+
+    <div class="project-top__bar"></div>
+
+    <div class="project-top__content">
       <h1>{{ project.name }}</h1>
       <p>{{ project.description }}</p>
     </div>
-
-    <div class="project-progress">
-      <span>Avancement</span>
-      <strong>{{ project.progress }}%</strong>
-    </div>
   </div>
 
-  <div class="sprints-list">
-    <article class="sprint-card" *ngFor="let sprint of sprints">
-      <div class="sprint-card__header">
-        <h2>{{ sprint.name }}</h2>
-        <button>Ajouter une tâche</button>
+  <!-- Onglets -->
+  <div class="project-tabs">
+    <button
+      type="button"
+      [ngClass]="{ active: activeTab === 'overview' }"
+      (click)="setActiveTab('overview')"
+    >
+      Vue globale
+    </button>
+
+    <button
+      type="button"
+      [ngClass]="{ active: activeTab === 'sprints' }"
+      (click)="setActiveTab('sprints')"
+    >
+      Sprints
+    </button>
+  </div>
+
+  <!-- Vue globale -->
+  <ng-container *ngIf="activeTab === 'overview'">
+
+    <!-- Bloc stats -->
+    <div class="detail-stats-card">
+      <div class="detail-stats-item">
+        <span class="detail-stats-item__label">SPRINTS ACTIFS</span>
+        <strong class="detail-stats-item__value">{{ stats.activeSprints }}</strong>
       </div>
 
-      <div class="tasks-list">
-        <div class="task-row" *ngFor="let task of sprint.tasks">
-          <div>
-            <h3>{{ task.name }}</h3>
+      <div class="detail-stats-item">
+        <span class="detail-stats-item__label">TERMINÉS</span>
+        <strong class="detail-stats-item__value">{{ stats.completed }}</strong>
+      </div>
+
+      <div class="detail-stats-item">
+        <span class="detail-stats-item__label">PLANIFIÉS</span>
+        <strong class="detail-stats-item__value">{{ stats.planned }}</strong>
+      </div>
+
+      <div class="detail-stats-item">
+        <span class="detail-stats-item__label">PROGRESSION</span>
+        <strong class="detail-stats-item__value">{{ stats.progress }}%</strong>
+      </div>
+    </div>
+
+    <!-- Répartition des tâches -->
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Répartition des tâches</h2>
+      </div>
+
+      <div class="task-distribution">
+        <div class="task-distribution__row" *ngFor="let item of taskDistribution">
+          <div class="task-distribution__head">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.done }} / {{ item.total }}</strong>
           </div>
 
-          <span class="status-badge" [ngClass]="task.status">
-            {{ task.status }}
-          </span>
+          <div class="simple-progress">
+            <div
+              class="simple-progress__fill"
+              [ngClass]="item.className"
+              [style.width.%]="item.width"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+     <!-- Équipe -->
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Équipe</h2>
+      </div>
+
+      <div class="team-list">
+        <div class="team-item" *ngFor="let member of team">
+          <div class="team-item__left">
+            <div class="team-item__avatar">{{ member.initials }}</div>
+            <span class="team-item__name">{{ member.name }}</span>
+          </div>
+
+          <span class="team-item__count">{{ member.tasks }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sprints en cours -->
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Sprints en cours</h2>
+      </div>
+
+      <div class="current-sprint">
+        <div class="current-sprint__top">
+          <div>
+            <h3>{{ currentSprint.name }}</h3>
+            <p>{{ currentSprint.description }}</p>
+          </div>
+
+          <span class="current-sprint__percent">{{ currentSprint.progress }}%</span>
+        </div>
+
+        <div class="current-sprint__meta">
+          <span>◷ {{ currentSprint.period }}</span>
+          <span>·</span>
+          <span>{{ currentSprint.tasks }}</span>
+        </div>
+
+        <div class="simple-progress">
+          <div class="simple-progress__fill" [style.width.%]="currentSprint.progress"></div>
+        </div>
+      </div>
+    </section>
+
+     <!-- Planning -->
+    <section class="panel">
+      <div class="panel__header">
+        <h2>Planning</h2>
+
+        <div class="legend">
+          <span><i class="dot dot--done"></i> Terminé</span>
+          <span><i class="dot dot--progress"></i> En cours</span>
+          <span><i class="dot dot--todo"></i> Planifié</span>
+        </div>
+      </div>
+
+      <div class="planning">
+        <div class="planning__months">
+          <span>Déc 2025</span>
+          <span>Jan 2026</span>
+        </div>
+
+        <div class="planning__body">
+          <div class="planning__row" *ngFor="let row of planningRows">
+            <div class="planning__label">{{ row.name }}</div>
+
+            <div class="planning__track">
+              <div
+                class="planning__bar"
+                [ngClass]="row.className"
+                [style.left]="row.left"
+                [style.width]="row.width"
+              >
+                {{ row.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="planning__scrollbar"></div>
+      </div>
+    </section>
+</ng-container>
+
+      <!-- Vue sprints -->
+<ng-container *ngIf="activeTab === 'sprints'">
+  <div class="sprints-overview">
+    <span class="sprints-overview__count">{{ sprints.length }} sprints</span>
+
+    <button type="button" class="sprints-overview__button">
+      <span>＋</span>
+      Nouveau sprint
+    </button>
+  </div>
+
+  <section class="sprints-panel">
+    <article class="sprint-accordion" *ngFor="let sprint of sprints">
+      <div class="sprint-accordion__header" (click)="toggleSprint(sprint.id)">
+        <div class="sprint-accordion__left">
+          <button
+            type="button"
+            class="sprint-accordion__toggle"
+            aria-label="Ouvrir ou fermer le sprint"
+          >
+            <span [ngClass]="{ open: sprint.isOpen }">›</span>
+          </button>
+
+          <div class="sprint-accordion__info">
+            <div class="sprint-accordion__title-line">
+              <h3>{{ sprint.name }}</h3>
+
+              <span
+                class="sprint-badge"
+                [ngClass]="{
+                  'sprint-badge--done': sprint.badgeClass === 'done',
+                  'sprint-badge--in-progress': sprint.badgeClass === 'in_progress',
+                  'sprint-badge--planned': sprint.badgeClass === 'planned'
+                }"
+              >
+                {{ sprint.badgeLabel }}
+              </span>
+            </div>
+
+            <div class="sprint-accordion__meta">
+              <span>◷ {{ sprint.period }}</span>
+              <span>·</span>
+              <span>{{ sprint.taskProgress }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sprint-accordion__right">
+          <div class="mini-progress">
+            <div class="mini-progress__fill" [style.width.%]="sprint.progress"></div>
+          </div>
+          <span class="sprint-accordion__percent">{{ sprint.progress }}%</span>
+        </div>
+      </div>
+
+      <div class="sprint-accordion__content" *ngIf="sprint.isOpen">
+        <p class="sprint-accordion__description">
+          {{ sprint.description }}
+        </p>
+
+        <div class="sprint-tasks">
+          <div class="sprint-tasks__head">
+            <span>TÂCHE</span>
+            <span>ASSIGNÉ</span>
+            <span>STATUT</span>
+          </div>
+
+          <div class="sprint-task-row" *ngFor="let task of sprint.tasks">
+            <span class="sprint-task-row__name">{{ task.name }}</span>
+            <span class="sprint-task-row__assignee">{{ task.assignee }}</span>
+
+            <span class="sprint-task-row__status">
+              <span
+                class="status-icon"
+                [ngClass]="{
+                  'status-icon--done': task.status === 'done',
+                  'status-icon--in-progress': task.status === 'in_progress',
+                  'status-icon--todo': task.status === 'todo'
+                }"
+              >
+                {{ task.status === 'done' ? '✓' : '○' }}
+              </span>
+
+              <span>
+                {{
+                  task.status === 'done'
+                    ? 'Terminé'
+                    : task.status === 'in_progress'
+                    ? 'En cours'
+                    : 'À faire'
+                }}
+              </span>
+            </span>
+          </div>
         </div>
       </div>
     </article>
-  </div>
+  </section>
+</ng-container>
+
 </section>

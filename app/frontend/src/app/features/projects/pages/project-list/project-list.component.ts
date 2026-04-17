@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-project-list',
@@ -10,6 +10,14 @@ import { NgFor } from '@angular/common';
   styleUrl: './project-list.component.scss'
 })
 export class ProjectListComponent {
+  stats = {
+    projects: 4,
+    activeSprints: 4,
+    totalSprints: 10,
+    completedTasks: 14,
+    totalTasks: 36
+  };
+
   projects = [
     {
       id: '1',

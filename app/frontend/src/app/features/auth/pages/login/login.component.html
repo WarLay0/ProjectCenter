@@ -28,9 +28,16 @@
         />
       </div>
 
-      <button type="submit">Se connecter</button>
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Connexion...' : 'Se connecter' }}
+      </button>
     </form>
 
     <p class="error" *ngIf="error">{{ error }}</p>
+
+    <p class="auth-link">
+      Pas encore de compte ?
+      <a routerLink="/register">Créer mon compte</a>
+    </p>
   </div>
 </section>

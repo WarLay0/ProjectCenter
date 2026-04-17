@@ -1,45 +1,84 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Observable, tap } from 'rxjs';
+
+export interface CurrentUser {
+  id?: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  token: string;
+}
+
+export interface RegisterPayload {
+  email: string;
+  password: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
   private apiUrl = environment.apiUrl;
+  private tokenKey = 'token';
+
+  private currentUserSubject = new BehaviorSubject<CurrentUser | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/login_check`, {
-      username: email,
-      password: password
+  register(payload: RegisterPayload): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/register`, payload);
+  }
+
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth`, {
+      email,
+      password
     }).pipe(
-      tap((res: any) => {
-        this.setToken(res.token);
+      tap((response) => {
+        this.setToken(response.token);
       })
     );
   }
 
-  getMe(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/api/me`);
+  getMe(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${this.apiUrl}/me`).pipe(
+      tap((user) => {
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 
-  logout() {
-    localStorage.removeItem('token');
+  loadCurrentUser(): void {
+    if (!this.getToken()) {
+      this.currentUserSubject.next(null);
+      return;
+    }
+
+    this.getMe().subscribe({
+      error: () => {
+        this.logout();
+      }
+    });
   }
 
-  setToken(token: string) {
-    localStorage.setItem('token', token);
+  setToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem(this.tokenKey);
   }
 
-  isLogged(): boolean {
+  isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    this.currentUserSubject.next(null);
   }
 }
