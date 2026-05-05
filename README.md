@@ -15,9 +15,9 @@ Application de gestion de projets type Kanban / Scrum (projet fil rouge YNOV).
 
 ## Endpoints principaux
 
-- `POST /api/register` — création d'un compte
-- `POST /api/login_check` — récupération d'un token JWT
-- `GET /api/me` — utilisateur courant
+- `POST /api/register` - création d'un compte
+- `POST /api/login_check` - récupération d'un token JWT
+- `GET /api/me` - utilisateur courant
 - `GET|POST|PATCH|DELETE /api/projects`
 - `GET|POST|PATCH|DELETE /api/sprints`
 - `GET|POST|PATCH|DELETE /api/tasks`
