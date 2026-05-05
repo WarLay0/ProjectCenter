@@ -1,0 +1,74 @@
+.header {
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+
+.header__left,
+.header__right {
+  display: flex;
+  align-items: center;
+}
+
+.header__left {
+  gap: 14px;
+}
+
+.header__right {
+  gap: 18px;
+}
+
+.header__logo-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #111827;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.header__title {
+  font-size: 17px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.header__link {
+  text-decoration: none;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.header__user-name {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.header__logout {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 14px;
+}
