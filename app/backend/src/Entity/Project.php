@@ -24,6 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Dto\CreateProjectInput;
 
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
@@ -31,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   operations: [
     new GetCollection(),
     new Get(security: 'object.getOwner() and user and object.getOwner().getId() == user.getId()'),
-    new Post(processor: CreateProjectProcessor::class),
+    new Post(input: CreateProjectInput::class, processor: CreateProjectProcessor::class),
     new Patch(security: 'object.getOwner() and user and object.getOwner().getId() == user.getId()'),
     new Delete(security: 'object.getOwner() and user and object.getOwner().getId() == user.getId()'),
   ],

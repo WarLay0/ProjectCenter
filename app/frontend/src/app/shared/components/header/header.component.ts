@@ -20,9 +20,13 @@ export class HeaderComponent {
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
-    this.initials$ = this.currentUser$.pipe(
-      map(user => user?.email ? user.email.substring(0, 2).toUpperCase() : '')
-    );
+   this.initials$ = this.currentUser$.pipe(
+  map(user => {
+    if (!user?.email) return '';
+    const name = user.email.split('@')[0];
+    return name.charAt(0).toUpperCase();
+  })
+);
   }
 
   logout(): void {

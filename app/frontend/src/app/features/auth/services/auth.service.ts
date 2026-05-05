@@ -31,16 +31,16 @@ export class AuthService {
     });
   }
 
-  login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/api/login_check`, {
-      username: email,
-      password
-    }).pipe(
-      tap((res) => {
-        localStorage.setItem(this.tokenKey, res.token);
-      })
-    );
-  }
+ login(email: string, password: string): Observable<AuthResponse> {
+  return this.http.post<AuthResponse>(`${this.apiUrl}/api/login_check`, {
+    email,
+    password
+  }).pipe(
+    tap((res) => {
+      localStorage.setItem(this.tokenKey, res.token);
+    })
+  );
+}
 
   getMe(): Observable<CurrentUser> {
     return this.http.get<CurrentUser>(`${this.apiUrl}/api/me`).pipe(
