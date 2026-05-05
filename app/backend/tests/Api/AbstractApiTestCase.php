@@ -8,14 +8,19 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase as BaseApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use Throwable;
 
 abstract class AbstractApiTestCase extends BaseApiTestCase
 {
+  // ==================== Properties ====================
+
   protected static ?bool $alwaysBootKernel = true;
 
   protected Client $client;
 
   private ?EntityManagerInterface $entityManager = null;
+
+  // ==================== Lifecycle ====================
 
   protected function setUp(): void
   {
@@ -43,16 +48,18 @@ abstract class AbstractApiTestCase extends BaseApiTestCase
     parent::tearDown();
   }
 
+  // ==================== Helpers ====================
+
   protected function registerUser(string $email, string $password = 'password123'): void
   {
-    $this->client->request('POST', '/api/register', [
+    $response = $this->client->request('POST', '/api/register', [
       'json' => [
         'email' => $email,
         'password' => $password,
       ],
     ]);
 
-    self::assertResponseStatusCodeSame(201);
+    self::assertSame(201, $response->getStatusCode(), (string) $response->getContent(false));
   }
 
   protected function loginUser(string $email, string $password = 'password123'): string
@@ -64,7 +71,7 @@ abstract class AbstractApiTestCase extends BaseApiTestCase
       ],
     ]);
 
-    self::assertResponseIsSuccessful();
+    self::assertSame(200, $response->getStatusCode(), (string) $response->getContent(false));
 
     $data = $response->toArray(false);
 
@@ -83,6 +90,8 @@ abstract class AbstractApiTestCase extends BaseApiTestCase
     ]);
   }
 
+  // ==================== Database ====================
+
   private function resetDatabase(): void
   {
     if (!$this->entityManager instanceof EntityManagerInterface) {
@@ -99,7 +108,7 @@ abstract class AbstractApiTestCase extends BaseApiTestCase
 
     try {
       $schemaTool->dropSchema($metadata);
-    } catch (\Throwable) {
+    } catch (Throwable) {
     }
 
     $schemaTool->createSchema($metadata);

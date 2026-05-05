@@ -9,10 +9,13 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Entity\Task;
 use App\Entity\User;
+use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+use function count;
 
 final class CreateTaskProcessor implements ProcessorInterface
 {
@@ -27,7 +30,7 @@ final class CreateTaskProcessor implements ProcessorInterface
   public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Task
   {
     if (!$data instanceof Task) {
-      throw new \InvalidArgumentException('Invalid task payload.');
+      throw new InvalidArgumentException('Invalid task payload.');
     }
 
     $user = $this->security->getUser();
@@ -36,6 +39,7 @@ final class CreateTaskProcessor implements ProcessorInterface
       throw new AccessDeniedHttpException('Authentication required.');
     }
 
+    // On remonte la chaine Task -> Sprint -> Project -> Owner pour verifier que c'est bien l'utilisateur connecte
     $sprint = $data->getSprint();
 
     if ($sprint === null || $sprint->getProject() === null || $sprint->getProject()->getOwner() !== $user) {

@@ -9,9 +9,12 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Dto\RegisterUserInput;
 use App\Entity\User;
+use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+use function count;
 
 final class RegisterUserProcessor implements ProcessorInterface
 {
@@ -26,9 +29,10 @@ final class RegisterUserProcessor implements ProcessorInterface
   public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): User
   {
     if (!$data instanceof RegisterUserInput) {
-      throw new \InvalidArgumentException('Invalid register payload.');
+      throw new InvalidArgumentException('Invalid register payload.');
     }
 
+    // On hash le mot de passe avant de le stocker en base (jamais en clair !)
     $user = new User();
     $user->setEmail($data->email ?? '');
     $user->setRoles(['ROLE_USER']);
