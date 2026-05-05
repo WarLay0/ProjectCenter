@@ -40,10 +40,7 @@ export class RegisterComponent {
 
     this.isSubmitting = true;
 
-    this.authService.register({
-      email: this.email,
-      password: this.password
-    }).subscribe({
+   this.authService.register(this.email, this.password).subscribe({
       next: () => {
         this.success = 'Compte créé avec succès. Vous pouvez maintenant vous connecter.';
         this.isSubmitting = false;

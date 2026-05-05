@@ -8,13 +8,8 @@ export interface CurrentUser {
   email: string;
 }
 
-export interface AuthResponse {
+interface AuthResponse {
   token: string;
-}
-
-export interface RegisterPayload {
-  email: string;
-  password: string;
 }
 
 @Injectable({
@@ -29,44 +24,41 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  register(payload: RegisterPayload): Observable<unknown> {
-    return this.http.post(`${this.apiUrl}/register`, payload);
+  register(email: string, password: string): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/api/register`, {
+      email,
+      password
+    });
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth`, {
-      email,
+    return this.http.post<AuthResponse>(`${this.apiUrl}/api/login_check`, {
+      username: email,
       password
     }).pipe(
-      tap((response) => {
-        this.setToken(response.token);
+      tap((res) => {
+        localStorage.setItem(this.tokenKey, res.token);
       })
     );
   }
 
   getMe(): Observable<CurrentUser> {
-    return this.http.get<CurrentUser>(`${this.apiUrl}/me`).pipe(
-      tap((user) => {
-        this.currentUserSubject.next(user);
-      })
+    return this.http.get<CurrentUser>(`${this.apiUrl}/api/me`).pipe(
+      tap((user) => this.currentUserSubject.next(user))
     );
   }
 
   loadCurrentUser(): void {
-    if (!this.getToken()) {
+    const token = this.getToken();
+
+    if (!token) {
       this.currentUserSubject.next(null);
       return;
     }
 
     this.getMe().subscribe({
-      error: () => {
-        this.logout();
-      }
+      error: () => this.logout()
     });
-  }
-
-  setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
   }
 
   getToken(): string | null {
