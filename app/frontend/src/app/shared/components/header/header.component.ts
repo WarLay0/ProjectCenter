@@ -1,8 +1,8 @@
 import { AsyncPipe, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, CurrentUser } from '../../../features/auth/services/auth.service';
 import { map, Observable } from 'rxjs';
+import { AuthService, CurrentUser } from '../../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -20,19 +20,13 @@ export class HeaderComponent {
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
-
     this.initials$ = this.currentUser$.pipe(
-      map((user) => this.getInitials(user))
+      map(user => user?.email ? user.email.substring(0, 2).toUpperCase() : '')
     );
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  private getInitials(user: CurrentUser | null): string {
-    if (!user?.email) return '';
-    return user.email.substring(0, 2).toUpperCase();
   }
 }

@@ -9,9 +9,7 @@
       <a routerLink="/projects" class="header__link">Projets</a>
       <span class="header__user-name">{{ user.email }}</span>
       <div class="header__avatar">{{ initials$ | async }}</div>
-      <button class="header__logout" type="button" (click)="logout()">
-        Déconnexion
-      </button>
+      <button class="header__logout" type="button" (click)="logout()">Déconnexion</button>
     </ng-container>
 
     <ng-template #guestLinks>
