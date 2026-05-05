@@ -1,0 +1,19 @@
+<header class="header">
+  <div class="header__left">
+    <div class="header__logo-box">P</div>
+    <span class="header__title">Project Center</span>
+  </div>
+
+  <div class="header__right">
+    <ng-container *ngIf="currentUser$ | async as user; else guestLinks">
+      <a routerLink="/projects" class="header__link">Projets</a>
+      <span class="header__user-name">{{ user.email }}</span>
+      <div class="header__avatar">{{ initials$ | async }}</div>
+      <button class="header__logout" type="button" (click)="logout()">Déconnexion</button>
+    </ng-container>
+
+    <ng-template #guestLinks>
+      <a routerLink="/login" class="header__link">Connexion</a>
+    </ng-template>
+  </div>
+</header>
