@@ -52,7 +52,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   'sprint' => 'exact',
   'status' => 'exact',
   'name' => 'partial',
-  'assignee' => 'partial'
+  'assignee' => 'partial',
 ])]
 #[ApiFilter(OrderFilter::class, properties: ['position', 'createdAt'])]
 class Task

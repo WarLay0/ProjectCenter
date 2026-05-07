@@ -9,10 +9,12 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Entity\Sprint;
 use App\Entity\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use function count;
@@ -46,14 +48,16 @@ final class CreateSprintProcessor implements ProcessorInterface
       throw new AccessDeniedHttpException('You cannot create a sprint in this project.');
     }
 
-    // TODO: gerer le cas ou la position est deja prise (actuellement ca part en 500 a cause de la contrainte unique)
-
     $violations = $this->validator->validate($data);
 
     if (count($violations) > 0) {
       throw new ValidationException($violations);
     }
 
-    return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+    try {
+      return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+    } catch (UniqueConstraintViolationException) {
+      throw new ConflictHttpException('Cette position est deja prise pour ce projet.');
+    }
   }
 }

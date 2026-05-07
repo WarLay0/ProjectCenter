@@ -32,7 +32,9 @@ export class TaskService {
     return this.http.post<Task>(`${this.apiUrl}/tasks`, data);
   }
   getTasksBySprint(sprintId: string): Observable<Task[]> {
-  return this.http.get<any>(`${this.apiUrl}/tasks?sprint=/api/sprints/${sprintId}`).pipe(
+  const sprintIri = encodeURIComponent(`/api/sprints/${sprintId}`);
+
+  return this.http.get<any>(`${this.apiUrl}/tasks?sprint=${sprintIri}`).pipe(
     map(response => response.member ?? response['hydra:member'] ?? response),
     map((tasks: any[]) =>
       tasks.map(task => ({

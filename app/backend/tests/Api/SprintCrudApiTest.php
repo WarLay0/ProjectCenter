@@ -75,7 +75,7 @@ final class SprintCrudApiTest extends AbstractApiTestCase
       'json' => ['name' => 'Sprint 1bis', 'position' => 1, 'project' => $projectIri],
     ]);
 
-    self::assertResponseStatusCodeSame(500);
+    self::assertResponseStatusCodeSame(409);
   }
 
   public function testCreateSprintInOtherUserProjectIsForbidden(): void
