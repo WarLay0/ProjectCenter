@@ -29,9 +29,21 @@
 .project-top__back {
   text-decoration: none;
   color: #dbeafe;
-  font-size: 30px;
-  line-height: 1;
-  margin-top: 4px;
+  margin-top: 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .project-top__bar {
@@ -100,9 +112,8 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   box-shadow:
     0 14px 34px rgba(15, 23, 42, 0.08),
     0 4px 10px rgba(15, 23, 42, 0.04);
@@ -115,90 +126,34 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow: hidden;
-  transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
+  transition: background 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.02);
+    background: #f8fafc;
   }
+
+  /* Petit accent vertical bleu marine pour le rythme visuel */
 
   &::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at top right, rgba(255, 255, 255, 0.28), transparent 45%);
-    pointer-events: none;
+    left: 0;
+    top: 22px;
+    bottom: 22px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(180deg, #2563eb, #1e40af);
   }
 }
 
 .detail-stats-item:nth-child(1),
 .detail-stats-item:nth-child(2) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .detail-stats-item:nth-child(1),
 .detail-stats-item:nth-child(3) {
-  border-right: 1px solid rgba(255, 255, 255, 0.22);
-}
-
-/* SPRINTS ACTIFS - jaune */
-
-.detail-stats-item:nth-child(1) {
-  background: linear-gradient(135deg, #fef9c3, #fde68a);
-
-  .detail-stats-item__label {
-    color: #92400e;
-  }
-
-  .detail-stats-item__value {
-    color: #3f3f46;
-  }
-}
-
-/* TERMINÉS - vert */
-
-.detail-stats-item:nth-child(2) {
-  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-
-  .detail-stats-item__label {
-    color: #166534;
-  }
-
-  .detail-stats-item__value {
-    color: #14532d;
-  }
-}
-
-/* PLANIFIÉS - bleu */
-
-.detail-stats-item:nth-child(3) {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-
-  .detail-stats-item__label {
-    color: #1e3a8a;
-  }
-
-  .detail-stats-item__value {
-    color: #0f172a;
-  }
-}
-
-/* PROGRESSION - violet sobre */
-
-.detail-stats-item:nth-child(4) {
-  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-
-  .detail-stats-item__label {
-    color: #5b21b6;
-  }
-
-  .detail-stats-item__value {
-    color: #312e81;
-  }
+  border-right: 1px solid #e2e8f0;
 }
 
 .detail-stats-item__label {
@@ -403,6 +358,14 @@ $status-planned: #2563eb;
   font-size: 14px;
 }
 
+/* Aligner icone Lucide + texte dans les metas (clock + periode etc.) */
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Progress */
 
 .simple-progress {
@@ -575,17 +538,20 @@ $status-planned: #2563eb;
   border: none;
   background: transparent;
   color: #64748b;
-  font-size: 26px;
   padding: 0;
   width: 24px;
   cursor: pointer;
 
-  span {
-    display: inline-block;
-    transition: transform 0.2s ease;
-  }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  span.open {
+.sprint-accordion__chevron {
+  display: inline-flex;
+  transition: transform 0.2s ease;
+
+  &.open {
     transform: rotate(90deg);
   }
 }
@@ -728,11 +694,9 @@ $status-planned: #2563eb;
 }
 
 .status-icon {
-  width: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
 }
 
 .status-icon--done {
@@ -897,6 +861,10 @@ $status-planned: #2563eb;
   height: 34px;
   border-radius: 8px;
   cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Action buttons */
@@ -907,15 +875,56 @@ $status-planned: #2563eb;
   border-radius: 10px;
   padding: 6px 9px;
   cursor: pointer;
+  color: #475569;
   transition: all 0.2s ease;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background: #e0f2fe;
     border-color: #93c5fd;
+    color: #1d4ed8;
   }
 }
 
 .sprint-action-btn--delete:hover {
   background: #fee2e2;
   border-color: #fecaca;
+  color: #b91c1c;
+}
+
+/* Boutons d'edit/delete dans une ligne de task (icons uniquement) */
+
+.sprint-task-row__actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+
+  button {
+    border: 1px solid #dbe3ef;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 6px 9px;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.2s ease;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: #e0f2fe;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+    }
+  }
+
+  .sprint-task-row__actions--delete:hover {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+  }
 }

@@ -31,6 +31,7 @@ export class AuthService {
     });
   }
 
+  // Quand le login reussit, on stocke le JWT dans le localStorage pour le reutiliser dans les requetes suivantes (via l'interceptor).
  login(email: string, password: string): Observable<AuthResponse> {
   return this.http.post<AuthResponse>(`${this.apiUrl}/api/login_check`, {
     email,
@@ -42,12 +43,14 @@ export class AuthService {
   );
 }
 
+  // Recupere l'user courant via /api/me et met a jour le BehaviorSubject pour que le header s'actualise.
   getMe(): Observable<CurrentUser> {
     return this.http.get<CurrentUser>(`${this.apiUrl}/api/me`).pipe(
       tap((user) => this.currentUserSubject.next(user))
     );
   }
 
+  // Appele au demarrage de l'app pour restaurer la session si on a un token. Si /api/me echoue, on logout (token invalide/expire).
   loadCurrentUser(): void {
     const token = this.getToken();
 

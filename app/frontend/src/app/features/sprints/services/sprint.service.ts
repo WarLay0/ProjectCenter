@@ -24,6 +24,8 @@ export class SprintService {
 
   constructor(private http: HttpClient) {}
 
+  // On filtre les sprints par projet via le SearchFilter d'API Platform : il attend l'IRI complete du projet.
+  // L'encodeURIComponent evite que les / de l'IRI cassent l'URL si un proxy est strict.
   getSprintsByProject(projectId: string): Observable<Sprint[]> {
     const projectIri = encodeURIComponent(`/api/projects/${projectId}`);
 

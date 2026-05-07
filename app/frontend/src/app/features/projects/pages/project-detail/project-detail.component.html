@@ -4,7 +4,7 @@
   <!-- Header projet -->
   <div class="project-top">
     <a routerLink="/projects" class="project-top__back" aria-label="Retour">
-      ←
+      <lucide-icon name="arrow-left" size="22"></lucide-icon>
     </a>
 
     <div class="project-top__bar"></div>
@@ -119,7 +119,10 @@
         </div>
 
         <div class="current-sprint__meta">
-          <span>◷ {{ currentSprint.period }}</span>
+          <span class="meta-item">
+            <lucide-icon name="clock" size="14"></lucide-icon>
+            {{ currentSprint.period }}
+          </span>
           <span>·</span>
           <span>{{ currentSprint.tasks }}</span>
         </div>
@@ -178,9 +181,9 @@
     <span class="sprints-overview__count">{{ sprints.length }} sprints</span>
 
     <button type="button" class="sprints-overview__button" (click)="toggleSprintForm()">
-  <span>＋</span>
-  Nouveau sprint
-</button>
+      <lucide-icon name="plus" size="16"></lucide-icon>
+      Nouveau sprint
+    </button>
   </div>
   <div class="sprint-form" *ngIf="showSprintForm">
   <h3>Nouveau sprint</h3>
@@ -247,8 +250,8 @@
         <option value="done">Terminé</option>
       </select>
 
-      <button type="button" (click)="removeTaskField(i)" *ngIf="newSprint.tasks.length > 1">
-        ×
+      <button type="button" aria-label="Retirer la tâche" (click)="removeTaskField(i)" *ngIf="newSprint.tasks.length > 1">
+        <lucide-icon name="x" size="16"></lucide-icon>
       </button>
     </div>
 
@@ -268,7 +271,9 @@
             class="sprint-accordion__toggle"
             aria-label="Ouvrir ou fermer le sprint"
           >
-            <span [ngClass]="{ open: sprint.isOpen }">›</span>
+            <span class="sprint-accordion__chevron" [ngClass]="{ open: sprint.isOpen }">
+              <lucide-icon name="chevron-right" size="20"></lucide-icon>
+            </span>
           </button>
 
           <div class="sprint-accordion__info">
@@ -288,7 +293,10 @@
             </div>
 
             <div class="sprint-accordion__meta">
-              <span>◷ {{ sprint.period }}</span>
+              <span class="meta-item">
+                <lucide-icon name="clock" size="14"></lucide-icon>
+                {{ sprint.period }}
+              </span>
               <span>·</span>
               <span>{{ sprint.taskProgress }}</span>
             </div>
@@ -304,17 +312,19 @@
             <button
             type="button"
             class="sprint-action-btn"
+            aria-label="Modifier le sprint"
             (click)="startEditSprint(sprint); $event.stopPropagation()"
           >
-            ✏️
+            <lucide-icon name="pencil" size="16"></lucide-icon>
           </button>
 
           <button
             type="button"
             class="sprint-action-btn sprint-action-btn--delete"
+            aria-label="Supprimer le sprint"
             (click)="deleteSprint(sprint.id); $event.stopPropagation()"
           >
-            🗑
+            <lucide-icon name="trash-2" size="16"></lucide-icon>
           </button>
         </div>
         
@@ -371,7 +381,8 @@
   class="add-task-btn"
   (click)="startAddTask(sprint.id)"
 >
-  ＋ Ajouter une tâche
+  <lucide-icon name="plus" size="16"></lucide-icon>
+  Ajouter une tâche
 </button>
 
 <form
@@ -426,7 +437,10 @@
                     'status-icon--todo': task.status === 'todo'
                   }"
                 >
-                  {{ task.status === 'done' ? '✓' : '○' }}
+                  <lucide-icon
+                    [name]="task.status === 'done' ? 'check-circle-2' : task.status === 'in_progress' ? 'circle-dashed' : 'circle'"
+                    size="16"
+                  ></lucide-icon>
                 </span>
 
                 <span>
@@ -440,9 +454,13 @@
                 </span>
               </span>
 
-              <div class="task-actions">
-                <button type="button" (click)="startEditTask(task)">✏️</button>
-                <button type="button" (click)="deleteTask(task.id)">🗑</button>
+              <div class="sprint-task-row__actions">
+                <button type="button" aria-label="Modifier la tâche" (click)="startEditTask(task)">
+                  <lucide-icon name="pencil" size="16"></lucide-icon>
+                </button>
+                <button type="button" class="sprint-task-row__actions--delete" aria-label="Supprimer la tâche" (click)="deleteTask(task.id)">
+                  <lucide-icon name="trash-2" size="16"></lucide-icon>
+                </button>
               </div>
             </ng-container>
 

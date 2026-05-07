@@ -4,13 +4,14 @@ import { RouterLink } from '@angular/router';
 import { ProjectService, Project } from '../../services/project.service';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 import { SprintService } from '../../../sprints/services/sprint.service';
 import { TaskService } from '../../../tasks/services/task.service';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [NgFor, NgIf, RouterLink,FormsModule],
+  imports: [NgFor, NgIf, RouterLink, FormsModule, LucideAngularModule],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss'
 })
@@ -66,6 +67,9 @@ createProject(): void {
   });
 }
 
+  // On charge les projets, puis pour chaque projet ses sprints, puis pour chaque sprint ses taches.
+  // C'est en cascade parce que l'API n'a pas d'endpoint qui agrege tout d'un coup.
+  // forkJoin = on attend que toutes les requetes paralleles soient finies avant de calculer les stats.
   loadProjects(): void {
   this.isLoading = true;
   this.error = '';
