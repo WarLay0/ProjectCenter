@@ -25,7 +25,9 @@ export class SprintService {
   constructor(private http: HttpClient) {}
 
   getSprintsByProject(projectId: string): Observable<Sprint[]> {
-    return this.http.get<any>(`${this.apiUrl}/sprints?project=/api/projects/${projectId}`).pipe(
+    const projectIri = encodeURIComponent(`/api/projects/${projectId}`);
+
+    return this.http.get<any>(`${this.apiUrl}/sprints?project=${projectIri}`).pipe(
       map(response => response.member ?? response['hydra:member'] ?? response),
       map((sprints: any[]) =>
         sprints.map(sprint => ({

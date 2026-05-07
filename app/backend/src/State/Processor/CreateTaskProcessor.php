@@ -9,10 +9,12 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Entity\Task;
 use App\Entity\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 use function count;
@@ -52,6 +54,10 @@ final class CreateTaskProcessor implements ProcessorInterface
       throw new ValidationException($violations);
     }
 
-    return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+    try {
+      return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+    } catch (UniqueConstraintViolationException) {
+      throw new ConflictHttpException('Cette position est deja prise pour ce sprint.');
+    }
   }
 }

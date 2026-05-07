@@ -18,6 +18,7 @@ use App\Repository\SprintRepository;
 use App\State\Processor\CreateSprintProcessor;
 use App\Trait\TimestampableTrait;
 use App\Trait\UuidTrait;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -53,13 +54,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiFilter(SearchFilter::class, properties: [
   'project' => 'exact',
   'name' => 'partial',
-  'status' => 'exact'
+  'status' => 'exact',
 ])]
 #[ApiFilter(OrderFilter::class, properties: [
   'position',
   'createdAt',
   'startDate',
-  'endDate'
+  'endDate',
 ])]
 class Sprint
 {
@@ -103,11 +104,15 @@ class Sprint
 
   #[ORM\Column(type: 'datetime_immutable', nullable: true)]
   #[Groups(['sprint:read', 'sprint:write'])]
-  private ?\DateTimeImmutable $startDate = null;
+  private ?DateTimeImmutable $startDate = null;
 
   #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+  #[Assert\GreaterThanOrEqual(
+    propertyPath: 'startDate',
+    message: 'La date de fin doit etre posterieure ou egale a la date de debut.'
+  )]
   #[Groups(['sprint:read', 'sprint:write'])]
-  private ?\DateTimeImmutable $endDate = null;
+  private ?DateTimeImmutable $endDate = null;
 
   #[ORM\ManyToOne(inversedBy: 'sprints')]
   #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -178,24 +183,24 @@ class Sprint
     return $this;
   }
 
-  public function getStartDate(): ?\DateTimeImmutable
+  public function getStartDate(): ?DateTimeImmutable
   {
     return $this->startDate;
   }
 
-  public function setStartDate(?\DateTimeImmutable $startDate): self
+  public function setStartDate(?DateTimeImmutable $startDate): self
   {
     $this->startDate = $startDate;
 
     return $this;
   }
 
-  public function getEndDate(): ?\DateTimeImmutable
+  public function getEndDate(): ?DateTimeImmutable
   {
     return $this->endDate;
   }
 
-  public function setEndDate(?\DateTimeImmutable $endDate): self
+  public function setEndDate(?DateTimeImmutable $endDate): self
   {
     $this->endDate = $endDate;
 
