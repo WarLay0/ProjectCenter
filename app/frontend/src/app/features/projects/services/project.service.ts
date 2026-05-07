@@ -18,6 +18,8 @@ export class ProjectService {
 
   constructor(private http: HttpClient) {}
 
+// API Platform peut renvoyer une collection au format JSON-LD (avec "member" / "hydra:member") ou JSON simple.
+// On tente les 3 formats pour etre robuste, puis on extrait l'id depuis "@id" si "id" n'est pas la.
 getProjects(): Observable<Project[]> {
   return this.http.get<any>(`${this.apiUrl}/projects`).pipe(
     map(response => response.member ?? response['hydra:member'] ?? response),
@@ -40,6 +42,7 @@ createProject(data: { name: string; description?: string }): Observable<any> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${id}`);
   }
 
+  // API Platform exige le Content-Type "application/merge-patch+json" pour les PATCH (sinon il refuse).
   updateProject(id: string, data: Partial<Project>): Observable<Project> {
   return this.http.patch<Project>(
     `${this.apiUrl}/projects/${id}`,

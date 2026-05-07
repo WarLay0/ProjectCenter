@@ -35,7 +35,10 @@
 
   <div class="projects-header">
     <h2>Mes projets</h2>
-    <button type="button" (click)="toggleForm()"> Nouveau projet</button>
+    <button type="button" (click)="toggleForm()">
+      <lucide-icon name="plus" size="16"></lucide-icon>
+      Nouveau projet
+    </button>
   </div>
   <div class="project-form" *ngIf="showForm">
   <h3>Nouveau projet</h3>
@@ -66,8 +69,12 @@
   <div class="projects-grid">
   <div class="project-card" *ngFor="let project of projects">
   <div class="project-card__actions">
-    <button type="button" (click)="startEdit(project)">✏️</button>
-    <button type="button" (click)="deleteProject(project.id)">🗑</button>
+    <button type="button" aria-label="Modifier" (click)="startEdit(project)">
+      <lucide-icon name="pencil" size="16"></lucide-icon>
+    </button>
+    <button type="button" aria-label="Supprimer" class="project-card__actions--delete" (click)="deleteProject(project.id)">
+      <lucide-icon name="trash-2" size="16"></lucide-icon>
+    </button>
   </div>
 
   <ng-container *ngIf="editingProjectId !== project.id; else editMode">

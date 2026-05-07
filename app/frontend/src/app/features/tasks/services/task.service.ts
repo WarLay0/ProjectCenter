@@ -31,6 +31,7 @@ export class TaskService {
   }): Observable<Task> {
     return this.http.post<Task>(`${this.apiUrl}/tasks`, data);
   }
+  // Meme principe que pour les sprints : on filtre par IRI du sprint (encodee).
   getTasksBySprint(sprintId: string): Observable<Task[]> {
   const sprintIri = encodeURIComponent(`/api/sprints/${sprintId}`);
 

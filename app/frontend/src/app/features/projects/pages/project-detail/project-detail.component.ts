@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 
 import { Project, ProjectService } from '../../services/project.service';
@@ -52,7 +53,7 @@ interface PlanningRow {
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [NgFor, NgClass, NgIf, RouterLink, FormsModule],
+  imports: [NgFor, NgClass, NgIf, RouterLink, FormsModule, LucideAngularModule],
   templateUrl: './project-detail.component.html',
   styleUrl: './project-detail.component.scss'
 })
@@ -166,6 +167,8 @@ newTask = {
     });
   }
 
+  // Charge les sprints du projet, puis pour chacun ses taches.
+  // Une fois tout recupere, on calcule les pourcentages d'avancement, le repartition par status, l'equipe, et le planning.
   loadSprints(projectId: string): void {
     this.sprintService.getSprintsByProject(projectId).subscribe({
       next: (sprints) => {
@@ -266,6 +269,8 @@ newTask = {
     return maxPosition + 1;
   }
 
+  // Cree d'abord le sprint, puis cree les taches du sprint en cascade.
+  // Si la creation des taches echoue mais que le sprint a ete cree, on alerte l'user (sprint sauve, mais pas les taches).
   createSprint(): void {
     if (!this.project.id || !this.newSprint.name.trim()) return;
 
@@ -427,6 +432,8 @@ newTask = {
     }
   }
 
+  // Construit le diagramme type "Gantt" : on calcule la position de chaque sprint en pourcentage de la timeline globale.
+  // On garde 7 jours de marge avant le premier sprint et apres le dernier pour que les barres ne soient pas collees aux bords.
   updatePlanningRows(): void {
     const datedSprints = this.sprints.filter(
       sprint => sprint.startDate && sprint.endDate

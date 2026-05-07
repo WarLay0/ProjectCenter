@@ -1,15 +1,34 @@
 <header class="header">
-  <div class="header__left">
+  <a routerLink="/projects" class="header__brand" aria-label="Retour à l'accueil">
     <div class="header__logo-box">P</div>
     <span class="header__title">Project Center</span>
-  </div>
+  </a>
 
   <div class="header__right">
     <ng-container *ngIf="currentUser$ | async as user; else guestLinks">
       <a routerLink="/projects" class="header__link">Projets</a>
-      <span class="header__user-name">{{ user.email }}</span>
-      <div class="header__avatar">{{ initials$ | async }}</div>
-      <button class="header__logout" type="button" (click)="logout()">Déconnexion</button>
+
+      <div class="header__user">
+        <button
+          type="button"
+          class="header__avatar"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="isMenuOpen"
+          aria-haspopup="menu"
+          aria-label="Menu utilisateur"
+        >
+          {{ initials$ | async }}
+          <lucide-icon name="chevron-down" size="14"></lucide-icon>
+        </button>
+
+        <div class="header__menu" *ngIf="isMenuOpen" role="menu">
+          <div class="header__menu-email">{{ user.email }}</div>
+          <button type="button" class="header__menu-item" role="menuitem" (click)="logout()">
+            <lucide-icon name="log-out" size="16"></lucide-icon>
+            Déconnexion
+          </button>
+        </div>
+      </div>
     </ng-container>
 
     <ng-template #guestLinks>
