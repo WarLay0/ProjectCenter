@@ -1,5 +1,6 @@
 <section class="project-detail-page">
-
+<p *ngIf="isLoading">Chargement du projet...</p>
+<p class="error" *ngIf="error">{{ error }}</p>
   <!-- Header projet -->
   <div class="project-top">
     <a routerLink="/projects" class="project-top__back" aria-label="Retour">
@@ -141,31 +142,33 @@
         </div>
       </div>
 
-      <div class="planning">
-        <div class="planning__months">
-          <span>Déc 2025</span>
-          <span>Jan 2026</span>
+     <div class="planning" *ngIf="planningRows.length">
+  <div class="planning__months">
+    <span>{{ planningStartLabel }}</span>
+    <span>{{ planningEndLabel }}</span>
+  </div>
+
+  <div class="planning__body">
+    <div class="planning__row" *ngFor="let row of planningRows">
+      <div class="planning__label">{{ row.name }}</div>
+
+      <div class="planning__track">
+        <div
+          class="planning__bar"
+          [ngClass]="row.className"
+          [style.left]="row.left"
+          [style.width]="row.width"
+        >
+          {{ row.label }}
         </div>
-
-        <div class="planning__body">
-          <div class="planning__row" *ngFor="let row of planningRows">
-            <div class="planning__label">{{ row.name }}</div>
-
-            <div class="planning__track">
-              <div
-                class="planning__bar"
-                [ngClass]="row.className"
-                [style.left]="row.left"
-                [style.width]="row.width"
-              >
-                {{ row.label }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="planning__scrollbar"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<p *ngIf="!planningRows.length" class="empty-state">
+  Aucun sprint avec dates définies.
+</p>
     </section>
 </ng-container>
 
@@ -174,11 +177,87 @@
   <div class="sprints-overview">
     <span class="sprints-overview__count">{{ sprints.length }} sprints</span>
 
-    <button type="button" class="sprints-overview__button">
-      <span>＋</span>
-      Nouveau sprint
-    </button>
+    <button type="button" class="sprints-overview__button" (click)="toggleSprintForm()">
+  <span>＋</span>
+  Nouveau sprint
+</button>
   </div>
+  <div class="sprint-form" *ngIf="showSprintForm">
+  <h3>Nouveau sprint</h3>
+
+  <form (ngSubmit)="createSprint()">
+    <label>Titre *</label>
+    <input
+      type="text"
+      name="sprintName"
+      [(ngModel)]="newSprint.name"
+      placeholder="Sprint 5 — Fonctionnalité X"
+      required
+    />
+
+    <div class="form-row">
+      <div>
+        <label>Début</label>
+        <input type="date" name="startDate" [(ngModel)]="newSprint.startDate" />
+      </div>
+
+      <div>
+        <label>Fin</label>
+        <input type="date" name="endDate" [(ngModel)]="newSprint.endDate" />
+      </div>
+    </div>
+
+    <label>Statut</label>
+    <select name="sprintStatus" [(ngModel)]="newSprint.status">
+      <option value="planned">Planifié</option>
+      <option value="in_progress">En cours</option>
+      <option value="done">Terminé</option>
+    </select>
+
+    <label>Description</label>
+    <textarea
+      name="sprintDescription"
+      [(ngModel)]="newSprint.description"
+      placeholder="Objectifs du sprint..."
+    ></textarea>
+
+    <div class="tasks-form-header">
+      <h4>Tâches</h4>
+      <button type="button" (click)="addTaskField()">Ajouter</button>
+    </div>
+
+    <div class="task-form-row" *ngFor="let task of newSprint.tasks; let i = index">
+      <input
+        type="text"
+        placeholder="Titre de la tâche"
+        [(ngModel)]="task.name"
+        [name]="'taskName' + i"
+      />
+
+      <input
+        type="text"
+        placeholder="Assigné à"
+        [(ngModel)]="task.assignee"
+        [name]="'taskAssignee' + i"
+      />
+
+      <select [(ngModel)]="task.status" [name]="'taskStatus' + i">
+        <option value="todo">À faire</option>
+        <option value="in_progress">En cours</option>
+        <option value="done">Terminé</option>
+      </select>
+
+      <button type="button" (click)="removeTaskField(i)" *ngIf="newSprint.tasks.length > 1">
+        ×
+      </button>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" (click)="resetSprintForm()">Annuler</button>
+      <button type="submit">Créer</button>
+    </div>
+  </form>
+</div>
 
   <section class="sprints-panel">
     <article class="sprint-accordion" *ngFor="let sprint of sprints">
@@ -216,19 +295,116 @@
           </div>
         </div>
 
-        <div class="sprint-accordion__right">
+       <div class="sprint-accordion__right">
           <div class="mini-progress">
             <div class="mini-progress__fill" [style.width.%]="sprint.progress"></div>
           </div>
+
           <span class="sprint-accordion__percent">{{ sprint.progress }}%</span>
+            <button
+            type="button"
+            class="sprint-action-btn"
+            (click)="startEditSprint(sprint); $event.stopPropagation()"
+          >
+            ✏️
+          </button>
+
+          <button
+            type="button"
+            class="sprint-action-btn sprint-action-btn--delete"
+            (click)="deleteSprint(sprint.id); $event.stopPropagation()"
+          >
+            🗑
+          </button>
         </div>
+        
       </div>
 
       <div class="sprint-accordion__content" *ngIf="sprint.isOpen">
-        <p class="sprint-accordion__description">
-          {{ sprint.description }}
-        </p>
+      <form
+        class="sprint-edit-form"
+        *ngIf="editingSprintId === sprint.id"
+        (ngSubmit)="updateSprint(sprint.id)"
+      >
+        <input
+          type="text"
+          name="editSprintName"
+          [(ngModel)]="editSprint.name"
+          required
+        />
 
+        <div class="form-row">
+          <input
+            type="date"
+            name="editSprintStartDate"
+            [(ngModel)]="editSprint.startDate"
+          />
+
+          <input
+            type="date"
+            name="editSprintEndDate"
+            [(ngModel)]="editSprint.endDate"
+          />
+        </div>
+
+        <select name="editSprintStatus" [(ngModel)]="editSprint.status">
+          <option value="planned">Planifié</option>
+          <option value="in_progress">En cours</option>
+          <option value="done">Terminé</option>
+        </select>
+
+        <textarea
+          name="editSprintDescription"
+          [(ngModel)]="editSprint.description"
+        ></textarea>
+
+        <div class="form-actions">
+          <button type="button" (click)="cancelEditSprint()">Annuler</button>
+          <button type="submit">Enregistrer</button>
+        </div>
+      </form>
+        <p class="sprint-accordion__description" *ngIf="editingSprintId !== sprint.id">
+        {{ sprint.description }}
+      </p>
+            <button
+  type="button"
+  class="add-task-btn"
+  (click)="startAddTask(sprint.id)"
+>
+  ＋ Ajouter une tâche
+</button>
+
+<form
+  class="task-edit-form"
+  *ngIf="addingTaskSprintId === sprint.id"
+  (ngSubmit)="createTaskInSprint(sprint)"
+>
+  <input
+    type="text"
+    name="newTaskName"
+    placeholder="Titre de la tâche"
+    [(ngModel)]="newTask.name"
+    required
+  />
+
+  <input
+    type="text"
+    name="newTaskAssignee"
+    placeholder="Assigné à"
+    [(ngModel)]="newTask.assignee"
+  />
+
+  <select name="newTaskStatus" [(ngModel)]="newTask.status">
+    <option value="todo">À faire</option>
+    <option value="in_progress">En cours</option>
+    <option value="done">Terminé</option>
+  </select>
+
+  <div class="task-actions">
+    <button type="button" (click)="cancelAddTask()">Annuler</button>
+    <button type="submit">Ajouter</button>
+  </div>
+</form>
         <div class="sprint-tasks">
           <div class="sprint-tasks__head">
             <span>TÂCHE</span>
@@ -236,33 +412,69 @@
             <span>STATUT</span>
           </div>
 
-          <div class="sprint-task-row" *ngFor="let task of sprint.tasks">
-            <span class="sprint-task-row__name">{{ task.name }}</span>
-            <span class="sprint-task-row__assignee">{{ task.assignee }}</span>
+         <div class="sprint-task-row" *ngFor="let task of sprint.tasks">
+            <ng-container *ngIf="editingTaskId !== task.id; else editTaskMode">
+              <span class="sprint-task-row__name">{{ task.name }}</span>
+              <span class="sprint-task-row__assignee">{{ task.assignee }}</span>
 
-            <span class="sprint-task-row__status">
-              <span
-                class="status-icon"
-                [ngClass]="{
-                  'status-icon--done': task.status === 'done',
-                  'status-icon--in-progress': task.status === 'in_progress',
-                  'status-icon--todo': task.status === 'todo'
-                }"
-              >
-                {{ task.status === 'done' ? '✓' : '○' }}
+              <span class="sprint-task-row__status">
+                <span
+                  class="status-icon"
+                  [ngClass]="{
+                    'status-icon--done': task.status === 'done',
+                    'status-icon--in-progress': task.status === 'in_progress',
+                    'status-icon--todo': task.status === 'todo'
+                  }"
+                >
+                  {{ task.status === 'done' ? '✓' : '○' }}
+                </span>
+
+                <span>
+                  {{
+                    task.status === 'done'
+                      ? 'Terminé'
+                      : task.status === 'in_progress'
+                      ? 'En cours'
+                      : 'À faire'
+                  }}
+                </span>
               </span>
 
-              <span>
-                {{
-                  task.status === 'done'
-                    ? 'Terminé'
-                    : task.status === 'in_progress'
-                    ? 'En cours'
-                    : 'À faire'
-                }}
-              </span>
-            </span>
+              <div class="task-actions">
+                <button type="button" (click)="startEditTask(task)">✏️</button>
+                <button type="button" (click)="deleteTask(task.id)">🗑</button>
+              </div>
+            </ng-container>
+
+            <ng-template #editTaskMode>
+              <form class="task-edit-form" (ngSubmit)="updateTask(task.id)">
+                <input
+                  type="text"
+                  name="editTaskName"
+                  [(ngModel)]="editTask.name"
+                  required
+                />
+
+                <input
+                  type="text"
+                  name="editTaskAssignee"
+                  [(ngModel)]="editTask.assignee"
+                />
+
+                <select name="editTaskStatus" [(ngModel)]="editTask.status">
+                  <option value="todo">À faire</option>
+                  <option value="in_progress">En cours</option>
+                  <option value="done">Terminé</option>
+                </select>
+
+                <div class="task-actions">
+                  <button type="button" (click)="cancelEditTask()">Annuler</button>
+                  <button type="submit">OK</button>
+                </div>
+              </form>
+            </ng-template>
           </div>
+          
         </div>
       </div>
     </article>

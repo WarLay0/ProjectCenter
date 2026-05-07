@@ -51,4 +51,14 @@ createProject(data: { name: string; description?: string }): Observable<any> {
     }
   );
 }
+getProjectById(id: string): Observable<Project> {
+  return this.http.get<any>(`${this.apiUrl}/projects/${id}`).pipe(
+    map(project => ({
+      id: project.id ?? project.uuid ?? project['@id']?.split('/').pop(),
+      name: project.name,
+      description: project.description,
+      progress: project.progress ?? 0
+    }))
+  );
+}
 }

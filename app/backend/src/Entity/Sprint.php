@@ -32,7 +32,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
   operations: [
     new GetCollection(),
-    new Get(security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'),
+    new Get(
+      security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
+    ),
     new Post(
       processor: CreateSprintProcessor::class,
       securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
@@ -41,16 +43,28 @@ use Symfony\Component\Validator\Constraints as Assert;
       security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()',
       securityPostDenormalize: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
     ),
-    new Delete(security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'),
+    new Delete(
+      security: 'object.getProject() and object.getProject().getOwner() and user and object.getProject().getOwner().getId() == user.getId()'
+    ),
   ],
   normalizationContext: ['groups' => ['sprint:read']],
   denormalizationContext: ['groups' => ['sprint:write']]
 )]
-#[ApiFilter(SearchFilter::class, properties: ['project' => 'exact', 'name' => 'partial'])]
-#[ApiFilter(OrderFilter::class, properties: ['position', 'createdAt'])]
+#[ApiFilter(SearchFilter::class, properties: [
+  'project' => 'exact',
+  'name' => 'partial',
+  'status' => 'exact'
+])]
+#[ApiFilter(OrderFilter::class, properties: [
+  'position',
+  'createdAt',
+  'startDate',
+  'endDate'
+])]
 class Sprint
 {
   // ==================== Traits ====================
+
   use UuidTrait;
   use TimestampableTrait;
 
@@ -79,6 +93,22 @@ class Sprint
   #[Groups(['sprint:read', 'sprint:write'])]
   private ?int $position = null;
 
+  #[ORM\Column(type: 'string', length: 30, options: ['default' => 'planned'])]
+  #[Assert\Choice(
+    choices: ['planned', 'in_progress', 'done'],
+    message: 'Le statut du sprint est invalide.'
+  )]
+  #[Groups(['sprint:read', 'sprint:write'])]
+  private string $status = 'planned';
+
+  #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+  #[Groups(['sprint:read', 'sprint:write'])]
+  private ?\DateTimeImmutable $startDate = null;
+
+  #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+  #[Groups(['sprint:read', 'sprint:write'])]
+  private ?\DateTimeImmutable $endDate = null;
+
   #[ORM\ManyToOne(inversedBy: 'sprints')]
   #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
   #[Assert\NotNull(message: 'Le projet du sprint est requis.')]
@@ -91,14 +121,14 @@ class Sprint
   #[Groups(['sprint:read'])]
   private Collection $tasks;
 
-  // ==================== Methods ====================
+  // ==================== Constructor ====================
 
   public function __construct()
   {
     $this->tasks = new ArrayCollection();
   }
 
-  // ==================== Getters/Setters ====================
+  // ==================== Getters / Setters ====================
 
   public function getName(): ?string
   {
@@ -132,6 +162,42 @@ class Sprint
   public function setPosition(int $position): self
   {
     $this->position = $position;
+
+    return $this;
+  }
+
+  public function getStatus(): string
+  {
+    return $this->status;
+  }
+
+  public function setStatus(string $status): self
+  {
+    $this->status = $status;
+
+    return $this;
+  }
+
+  public function getStartDate(): ?\DateTimeImmutable
+  {
+    return $this->startDate;
+  }
+
+  public function setStartDate(?\DateTimeImmutable $startDate): self
+  {
+    $this->startDate = $startDate;
+
+    return $this;
+  }
+
+  public function getEndDate(): ?\DateTimeImmutable
+  {
+    return $this->endDate;
+  }
+
+  public function setEndDate(?\DateTimeImmutable $endDate): self
+  {
+    $this->endDate = $endDate;
 
     return $this;
   }
