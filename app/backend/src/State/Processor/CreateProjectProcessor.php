@@ -7,13 +7,15 @@ namespace App\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
-use App\Dto\CreateProjectInput;
 use App\Entity\Project;
 use App\Entity\User;
+use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+use function count;
 
 final class CreateProjectProcessor implements ProcessorInterface
 {
@@ -27,8 +29,8 @@ final class CreateProjectProcessor implements ProcessorInterface
 
   public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Project
   {
-    if (!$data instanceof CreateProjectInput) {
-      throw new \InvalidArgumentException('Invalid project payload.');
+    if (!$data instanceof Project) {
+      throw new InvalidArgumentException('Invalid project payload.');
     }
 
     $user = $this->security->getUser();
@@ -37,17 +39,15 @@ final class CreateProjectProcessor implements ProcessorInterface
       throw new AccessDeniedHttpException('Authentication required.');
     }
 
-    $project = new Project();
-    $project->setName($data->name ?? '');
-    $project->setDescription($data->description);
-    $project->setOwner($user);
+    // On force l'owner a l'utilisateur courant pour qu'on puisse pas creer un projet pour quelqu'un d'autre
+    $data->setOwner($user);
 
-    $violations = $this->validator->validate($project);
+    $violations = $this->validator->validate($data);
 
     if (count($violations) > 0) {
       throw new ValidationException($violations);
     }
 
-    return $this->persistProcessor->process($project, $operation, $uriVariables, $context);
+    return $this->persistProcessor->process($data, $operation, $uriVariables, $context);
   }
 }

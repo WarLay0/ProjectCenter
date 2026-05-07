@@ -9,10 +9,13 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Entity\Sprint;
 use App\Entity\User;
+use InvalidArgumentException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+use function count;
 
 final class CreateSprintProcessor implements ProcessorInterface
 {
@@ -27,7 +30,7 @@ final class CreateSprintProcessor implements ProcessorInterface
   public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Sprint
   {
     if (!$data instanceof Sprint) {
-      throw new \InvalidArgumentException('Invalid sprint payload.');
+      throw new InvalidArgumentException('Invalid sprint payload.');
     }
 
     $user = $this->security->getUser();
@@ -36,11 +39,14 @@ final class CreateSprintProcessor implements ProcessorInterface
       throw new AccessDeniedHttpException('Authentication required.');
     }
 
+    // On verifie que le projet appartient bien a l'utilisateur connecte
     $project = $data->getProject();
 
     if ($project === null || $project->getOwner() !== $user) {
       throw new AccessDeniedHttpException('You cannot create a sprint in this project.');
     }
+
+    // TODO: gerer le cas ou la position est deja prise (actuellement ca part en 500 a cause de la contrainte unique)
 
     $violations = $this->validator->validate($data);
 

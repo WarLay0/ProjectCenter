@@ -30,7 +30,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
   operations: [
     new GetCollection(),
-    new Get(security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'),
+    new Get(
+      security: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'
+    ),
     new Post(
       processor: CreateTaskProcessor::class,
       securityPostDenormalize: 'object.getSprint() and object.getSprint().getProject() and object.getSprint().getProject().getOwner() and user and object.getSprint().getProject().getOwner().getId() == user.getId()'
@@ -46,21 +48,23 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['task:read']],
   denormalizationContext: ['groups' => ['task:write']]
 )]
-#[ApiFilter(SearchFilter::class, properties: ['sprint' => 'exact', 'status' => 'exact', 'name' => 'partial'])]
+#[ApiFilter(SearchFilter::class, properties: [
+  'sprint' => 'exact',
+  'status' => 'exact',
+  'name' => 'partial',
+  'assignee' => 'partial'
+])]
 #[ApiFilter(OrderFilter::class, properties: ['position', 'createdAt'])]
 class Task
 {
-  // ==================== Traits ====================
   use UuidTrait;
   use TimestampableTrait;
 
-  // ==================== Properties ====================
-
   #[ORM\Column(type: 'string', length: 255, nullable: false)]
-  #[Assert\NotBlank(message: 'Le nom de la task est requis.')]
+  #[Assert\NotBlank(message: 'Le nom de la tâche est requis.')]
   #[Assert\Length(
     max: 255,
-    maxMessage: 'Le nom de la task ne peut pas dépasser {{ limit }} caractères.'
+    maxMessage: 'Le nom de la tâche ne peut pas dépasser {{ limit }} caractères.'
   )]
   #[Groups(['task:read', 'task:write'])]
   private ?string $name = null;
@@ -68,34 +72,36 @@ class Task
   #[ORM\Column(type: 'text', nullable: true)]
   #[Assert\Length(
     max: 5000,
-    maxMessage: 'La description de la task ne peut pas dépasser {{ limit }} caractères.'
+    maxMessage: 'La description de la tâche ne peut pas dépasser {{ limit }} caractères.'
   )]
   #[Groups(['task:read', 'task:write'])]
   private ?string $description = null;
 
   #[ORM\Column(type: 'string', length: 20, nullable: false)]
-  #[Assert\NotBlank(message: 'Le statut de la task est requis.')]
+  #[Assert\NotBlank(message: 'Le statut de la tâche est requis.')]
   #[Assert\Choice(
     choices: ['todo', 'in_progress', 'done'],
-    message: 'Le statut de la task doit être valide.'
+    message: 'Le statut de la tâche doit être valide.'
   )]
   #[Groups(['task:read', 'task:write'])]
   private string $status = 'todo';
 
   #[ORM\Column(type: 'integer', nullable: false)]
-  #[Assert\NotNull(message: 'La position de la task est requise.')]
-  #[Assert\Positive(message: 'La position de la task doit être supérieure à 0.')]
+  #[Assert\NotNull(message: 'La position de la tâche est requise.')]
+  #[Assert\Positive(message: 'La position de la tâche doit être supérieure à 0.')]
   #[Groups(['task:read', 'task:write'])]
   private ?int $position = null;
 
+  #[ORM\Column(type: 'string', length: 255, nullable: true)]
+  #[Groups(['task:read', 'task:write'])]
+  private ?string $assignee = null;
+
   #[ORM\ManyToOne(inversedBy: 'tasks')]
   #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-  #[Assert\NotNull(message: 'Le sprint de la task est requis.')]
+  #[Assert\NotNull(message: 'Le sprint de la tâche est requis.')]
   #[ApiProperty(readableLink: false, writableLink: false)]
   #[Groups(['task:read', 'task:write'])]
   private ?Sprint $sprint = null;
-
-  // ==================== Getters/Setters ====================
 
   public function getName(): ?string
   {
@@ -141,6 +147,18 @@ class Task
   public function setPosition(int $position): self
   {
     $this->position = $position;
+
+    return $this;
+  }
+
+  public function getAssignee(): ?string
+  {
+    return $this->assignee;
+  }
+
+  public function setAssignee(?string $assignee): self
+  {
+    $this->assignee = $assignee;
 
     return $this;
   }
