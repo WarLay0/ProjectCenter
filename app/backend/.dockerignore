@@ -1,0 +1,5 @@
+vendor/
+var/
+.env.local
+.git/
+config/jwt/*.pem

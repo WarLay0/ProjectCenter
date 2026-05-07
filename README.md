@@ -36,6 +36,17 @@ php bin/console doctrine:migrations:migrate
 symfony serve
 ```
 
+## Avec Docker
+
+Trois services : `database` (Postgres 16), `backend` (PHP 8.4-fpm), `webserver` (nginx).
+L'API est exposee sur `http://localhost:8080`.
+
+```bash
+docker compose up -d --build
+docker compose exec backend php bin/console lexik:jwt:generate-keypair
+docker compose exec backend php bin/console doctrine:migrations:migrate --no-interaction
+```
+
 ## Tests
 
 ```bash
